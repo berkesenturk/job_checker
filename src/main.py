@@ -6,6 +6,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 
+from apscheduler.schedulers.blocking import BlockingScheduler
+
 class Html_Elements:
     def __init__(self, *args):
         pass
@@ -25,15 +27,6 @@ class Scraper:
     def parse_html_by_css_selector(self):
         self.html_parsed = bs(self.html, 'html.parser').select(self.css_selector)
     
-scraper = Scraper("https://eumetsat.jobbase.io", 'div[class="cell-table col-sm-17 col-xs-20"] > div > h3 > a')
-
-scraper.get_html()
-scraper.parse_html_by_css_selector()
-
-vacancies, file_links = [v.text for v in scraper.html_parsed], [(scraper.url + f['href']) for f in scraper.html_parsed]
-
-table_html = [f"<tr> <td> {i[0]} </td> <td> {i[1]} </td> </tr>" for i in tuple(zip(vacancies, file_links))]
-
 class Mail_Provider:
     def __init__(self, sender, password, receiver, subject, body):
         self.sender = sender
@@ -63,18 +56,40 @@ class Mail_Provider:
 
             print("Successfully delivered") if len(errors) == 0 else print("Something terrible happend while sending mail")
 
+def temporary_handler():
+    scraper = Scraper("https://eumetsat.jobbase.io", 'div[class="cell-table col-sm-17 col-xs-20"] > div > h3 > a')
 
-msg ="<!DOCTYPEhtml><html><head><style>table{font-family:arial,sans-serif;}td,th{border:1pxsolid#dddddd;text-align:left;padding:8px;}tr:nth-child(even){background-color:#dddddd;}</style></head>"
+    scraper.get_html()
+    scraper.parse_html_by_css_selector()
 
-msg_body = "<body><h2>Available Positions at EUMETSAT</h2><p>You'll be a part of this someday, so keep working every day!</p>  <table>   <tr>     <th>Position</th>     <th>Link</th>  %s  </table>  </body> </html>" %"".join(table_html)
+    vacancies, file_links = [v.text for v in scraper.html_parsed], [(scraper.url + f['href']) for f in scraper.html_parsed]
 
-msg += msg_body
+    table_html = [f"<tr> <td> {i[0]} </td> <td> {i[1]} </td> </tr>" for i in tuple(zip(vacancies, file_links))]
 
-mail_provider = Mail_Provider("jobupdatesfromeumetsat@gmail.com", 
-                              "scjpagonkjqozalo", 
-                              "berkesenturk11@gmail.com", 
-                              "EUMETSAT Vacancies on {}".format(datetime.today().strftime("%Y/%m/%d")), 
-                              msg)
+    msg ="<!DOCTYPEhtml><html><head><style>table{font-family:arial,sans-serif;}td,th{border:1pxsolid#dddddd;text-align:left;padding:8px;}tr:nth-child(even){background-color:#dddddd;}</style></head>"
 
-mail_provider.build_message()
-mail_provider.send_mail()
+    msg_body = "<body><h2>Available Positions at EUMETSAT</h2><p>You'll be a part of this someday, so keep working every day!</p>  <table>   <tr>     <th>Position</th>     <th>Link</th>  %s  </table>  </body> </html>" %"".join(table_html)
+
+    msg += msg_body
+
+    mail_provider = Mail_Provider("jobupdatesfromeumetsat@gmail.com", 
+                                "scjpagonkjqozalo", 
+                                "berkesenturk11@gmail.com", 
+                                "EUMETSAT Vacancies on {}".format(datetime.today().strftime("%Y/%m/%d")), 
+                                msg)
+
+    mail_provider.build_message()
+    mail_provider.send_mail()
+
+
+sched = BlockingScheduler()
+
+# @sched.scheduled_job('interval', da=3)
+# def timed_job():
+#     print('This job is run every three minutes.')
+
+@sched.scheduled_job('cron', day_of_week='mon-sun', hour=2, minute=30)
+def scheduled_job():
+    temporary_handler()
+
+sched.start()

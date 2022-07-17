@@ -54,7 +54,7 @@ class Mail_Provider:
 
             print("Successfully delivered") if len(errors) == 0 else print("Something terrible happend while sending mail")
 
-def temporary_handler():
+def job():
     scraper = Scraper("https://eumetsat.jobbase.io", 'div[class="cell-table col-sm-17 col-xs-20"] > div > h3 > a')
 
     scraper.get_html()
@@ -84,9 +84,10 @@ def temporary_handler():
 import schedule 
 import time
 
-schedule.every(30).seconds.do(temporary_handler)
-
+# schedule.every(30).seconds.do(temporary_handler)
+schedule.every().day.at("12:00").do(job)
 
 while True:
     schedule.run_pending()
     time.sleep(1)
+    

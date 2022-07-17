@@ -6,8 +6,6 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 
-from apscheduler.schedulers.blocking import BlockingScheduler
-
 class Html_Elements:
     def __init__(self, *args):
         pass
@@ -90,5 +88,5 @@ schedule.every(30).seconds.do(temporary_handler)
 
 
 while True:
-    schedule.run_pendin()
+    schedule.run_pending()
     time.sleep(1)

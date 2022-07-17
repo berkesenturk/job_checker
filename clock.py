@@ -83,14 +83,14 @@ def temporary_handler():
 
 # a = 'asda'
 
-# sched = BlockingScheduler()
+sched = BlockingScheduler()
 
-# @sched.scheduled_job('interval', da=1)
-# def timed_job():
-#     temporary_handler()
+@sched.scheduled_job('interval', da=1)
+def timed_job():
+    temporary_handler()
 
 # # @sched.scheduled_job('cron', day_of_week='mon-sun', hour=2, minute=30)
 # # def scheduled_job():
 # #     temporary_handler()
 
-# sched.start()
+sched.start()

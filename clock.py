@@ -81,16 +81,16 @@ def temporary_handler():
     mail_provider.build_message()
     mail_provider.send_mail()
 
-a = 'asda'
+# a = 'asda'
 
-sched = BlockingScheduler()
+# sched = BlockingScheduler()
 
-@sched.scheduled_job('interval', da=1)
-def timed_job():
-    temporary_handler()
-
-# @sched.scheduled_job('cron', day_of_week='mon-sun', hour=2, minute=30)
-# def scheduled_job():
+# @sched.scheduled_job('interval', da=1)
+# def timed_job():
 #     temporary_handler()
 
-sched.start()
+# # @sched.scheduled_job('cron', day_of_week='mon-sun', hour=2, minute=30)
+# # def scheduled_job():
+# #     temporary_handler()
+
+# sched.start()

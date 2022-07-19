@@ -5,6 +5,7 @@ import smtplib, ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+import schedule 
 
 class Html_Elements:
     def __init__(self, *args):
@@ -21,7 +22,7 @@ class Scraper:
         html = r.get(self.url, allow_redirects=True)
         self.html = html.text if html.status_code == 200 else "No data"
         
-
+    
     def parse_html_by_css_selector(self):
         self.html_parsed = bs(self.html, 'html.parser').select(self.css_selector)
     
@@ -44,11 +45,9 @@ class Mail_Provider:
 
         self.message = message.as_string()
 
+    
     def send_mail(self):
-
-        context = ssl.create_default_context()
-
-        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context=context) as server:
+        with smtplib.SMTP_SSL('smtp.gmail.com', 465, context = ssl.create_default_context()) as server:
             server.login(self.sender, self.password)
             errors = server.sendmail(self.sender, self.receiver, self.message)
 
@@ -71,23 +70,18 @@ def job():
     msg += msg_body
 
     mail_provider = Mail_Provider("jobupdatesfromeumetsat@gmail.com", 
-                                "scjpagonkjqozalo", 
-                                "berkesenturk11@gmail.com", 
-                                "EUMETSAT Vacancies on {}".format(datetime.today().strftime("%Y/%m/%d")), 
-                                msg)
+                                  "scjpagonkjqozalo", 
+                                  "berkesenturk11@gmail.com", 
+                                  "EUMETSAT Vacancies on {}".format(datetime.today().strftime("%Y/%m/%d")), 
+                                  msg)
 
     mail_provider.build_message()
     mail_provider.send_mail()
 
-# a = 'asda'
 
-import schedule 
-import time
 
-# schedule.every(30).seconds.do(temporary_handler)
-schedule.every().day.at("12:00").do(job)
-
+schedule.every().day.at("09:00").do(job) 
+ 
 while True:
     schedule.run_pending()
-    time.sleep(1)
     

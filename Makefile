@@ -13,4 +13,4 @@ heroku_deploy:
 	heroku ps:scale job_checker=1
 heroku_destroy:
 	heroku apps:destroy --app job-checker-app --confirm job-checker-app
-	heroku container:rm job-checker-app
+	docker rmi registry.heroku.com/job-checker-app/job_checker 

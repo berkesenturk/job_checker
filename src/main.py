@@ -5,7 +5,6 @@ import smtplib, ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
-import schedule 
 
 class Html_Elements:
     def __init__(self, *args):
@@ -78,10 +77,3 @@ def job():
     mail_provider.build_message()
     mail_provider.send_mail()
 
-
-
-schedule.every().day.at("09:00").do(job) 
- 
-while True:
-    schedule.run_pending()
-    

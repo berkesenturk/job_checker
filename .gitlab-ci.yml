@@ -1,0 +1,21 @@
+variables:
+  DOCKER_REGISTRY: 455447017028.dkr.ecr.eu-central-1.amazonaws.com
+  AWS_DEFAULT_REGION: eu-central-1
+  APP_NAME: jobchecker  
+  DOCKER_HOST: tcp://docker:2375
+  TAG: latest
+publish:
+  image:
+    name: amazon/aws-cli
+    entrypoint: [""]
+  services:
+    - docker:dind
+  before_script:
+    - amazon-linux-extras install docker
+    - aws --version
+    - docker --version
+  script:
+    # $CI_PIPELINE_IID
+    - docker build -t $DOCKER_REGISTRY/$APP_NAME:$TAG .
+    - aws ecr get-login-password | docker login --username AWS --password-stdin $DOCKER_REGISTRY
+    - docker push $DOCKER_REGISTRY/$APP_NAME:$TAG

@@ -5,6 +5,15 @@ import smtplib, ssl
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
+import logging
+
+logger = logging.getLogger(__name__)
+handler = logging.StreamHandler()
+formatter = logging.Formatter(
+    '%(asctime)s [%(name)-12s] %(levelname)-8s %(message)s')
+handler.setFormatter(formatter)
+logger.addHandler(handler)
+logger.setLevel(logging.DEBUG) 
 
 class Html_Elements:
     def __init__(self, *args):
@@ -20,6 +29,8 @@ class Scraper:
     def get_html(self):
         html = r.get(self.url, allow_redirects=True)
         self.html = html.text if html.status_code == 200 else "No data"
+
+        logging.error("get_html No data")
         
     
     def parse_html_by_css_selector(self):
@@ -50,9 +61,9 @@ class Mail_Provider:
             server.login(self.sender, self.password)
             errors = server.sendmail(self.sender, self.receiver, self.message)
 
-            print("Successfully delivered") if len(errors) == 0 else print("Something terrible happend while sending mail")
+            logger.info("Successfully delivered") if len(errors) == 0 else logger.error(f"Something terrible happend while sending mail. Errors: {errors}")
 
-def job():
+def run():
     scraper = Scraper("https://eumetsat.jobbase.io", 'div[class="cell-table col-sm-17 col-xs-20"] > div > h3 > a')
 
     scraper.get_html()
@@ -77,3 +88,5 @@ def job():
     mail_provider.build_message()
     mail_provider.send_mail()
 
+if __name__ == "__main__":
+    run()
